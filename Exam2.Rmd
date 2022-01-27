@@ -1,0 +1,100 @@
+---
+title: "Exam 2"
+author: "Jiaqi Ma 3028009001"
+date: "5/6/2021"
+output: pdf_document
+---
+```{r,warning=FALSE,message=FALSE,out.extra='angle=90',fig.height=7,out.height='7in',fig.width=9.5,out.width = '9.5in'}
+library(ggplot2)
+library(maps)
+theme_set(theme_bw())
+head(us.cities)
+head(world.cities)
+```
+
+a)
+```{r,warning=FALSE,message=FALSE,out.extra='angle=90',fig.height=7,out.height='7in',fig.width=9.5,out.width = '9.5in'}
+capitals=subset(world.cities,capital==1)
+capitals.big=subset(capitals,pop>6000000)
+head(capitals.big)
+p1=ggplot(capitals.big,aes(long,lat))+
+          borders("world")+
+          geom_point(aes(size=pop))+
+          geom_text(aes(long,lat,label=country.etc),
+                        hjust=-0.4,size=2,color="red")+
+          coord_map(projection="ortho",
+                    orientation=c(41,20,0))+
+          theme(legend.position="none")
+```
+
+b)
+```{r,warning=FALSE,message=FALSE,out.extra='angle=90',fig.height=7,out.height='7in',fig.width=9.5,out.width = '9.5in'}
+p2=ggplot(capitals.big,aes(long,lat))+
+          borders("world")+
+          geom_point(aes(size=pop))+
+          geom_text(aes(long,lat,label=country.etc),
+                        hjust=-0.3,size=2,color="red")+
+          coord_quickmap()+
+          theme(legend.position="none")
+```
+
+c)
+```{r,warning=FALSE,message=FALSE,out.extra='angle=90',fig.height=7,out.height='7in',fig.width=9.5,out.width = '9.5in'}
+italy.cities=subset(world.cities,country.etc=="Italy")
+italy.cities.big=subset(italy.cities,pop>250000)
+head(italy.cities.big)
+p3=ggplot(italy.cities.big,aes(long,lat))+
+          borders("italy")+
+          geom_point(aes(size=pop))+
+          geom_text(aes(long,lat,label=name),
+                    hjust=-0.3,size=2,color="red")+
+          coord_quickmap()+
+          theme(legend.position="none")
+```
+
+d)
+```{r,warning=FALSE,message=FALSE,out.extra='angle=90',fig.height=7,out.height='7in',fig.width=9.5,out.width = '9.5in'}
+library(dplyr)
+MainStates=map_data("state")          
+StatePopulation=read.csv("/Users/majiaqi/Desktop/ISE535/final/StatePopulation.csv")
+MergedStates=inner_join(MainStates,StatePopulation,by="region")
+head(MergedStates)
+p4=ggplot()+
+   geom_polygon(data=MergedStates,aes(long,lat,group=group,fill=population))+
+   scale_fill_continuous(low="thistle2",high="darkred",
+                         name="Population\n(in millions)",guide="colorbar")+
+   coord_quickmap()+
+   theme(legend.position="bottom")
+```
+
+e)
+```{r,warning=FALSE,message=FALSE,out.extra='angle=90',fig.height=7,out.height='7in',fig.width=9.5,out.width = '9.5in'}
+# a state map of Texas with cities with more than 500K people
+texas.cities=subset(us.cities,country.etc=="TX")
+texas.cities.big=subset(texas.cities,pop>500000)
+head(texas.cities.big)
+TXmap=map_data(map="county",region="texas")
+p5=ggplot()+
+   geom_polygon(data=TXmap,aes(long,lat,group=group),color="grey",fill="white")+
+   geom_point(data=texas.cities.big,aes(x=long,y=lat))+
+   geom_text(data=texas.cities.big,aes(long,lat,label=name),
+             hjust=-0.3,size=2,color="red",check_overlap=T)
+# a state map of California with cities with more than 400K people
+ca.cities=subset(us.cities,country.etc=="CA")
+ca.cities.big=subset(ca.cities,pop>400000)
+head(ca.cities.big)
+CAmap=map_data(map="county",region="california")
+p6=ggplot()+
+   geom_polygon(data=CAmap,aes(long,lat,group=group),color="grey",fill="white")+
+   geom_point(data=ca.cities.big,aes(x=long,y=lat))+
+   geom_text(data=ca.cities.big,aes(long,lat,label=name),
+             hjust=-0.3,size=2,color="red")
+```
+
+f)
+```{r,warning=FALSE,message=FALSE,out.extra='angle=90',fig.height=7,out.height='7in',fig.width=9.5,out.width = '9.5in'}
+library(cowplot)
+title=ggdraw()+draw_label("Maps from around the world by Jiaqi Ma (USC ID: 3028009001)")
+p=plot_grid(p1,p2,p3,p4,p5,p6,nrow=2,ncol=3)
+plot_grid(title,p,ncol=1,rel_heights=c(0.05,1))
+```

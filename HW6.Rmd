@@ -1,0 +1,142 @@
+---
+title: "HW6"
+author: "Jiaqi Ma 3028009001"
+date: "4/29/2021"
+output: pdf_document
+---
+
+```{r}
+library(ROCR)
+library(ISLR)
+head(Default)
+dim(Default)
+library(caret)
+set.seed(1)
+yvalues=Default$default
+train=createDataPartition(yvalues,p=0.5,list=FALSE)
+# test set
+y=Default[-train,]$default
+ntest=10000-length(train)
+ntest
+```
+1.
+```{r}
+# Use the train set to fit a Logistic regression model.
+model1=glm(default~.,Default,family=binomial,subset=train)
+probabs1=predict(model1,Default[-train,],type="response")
+head(probabs1)
+yhat1=rep("No",ntest)
+# Assume the threshold is 0.30.
+yhat1[probabs1>0.3]="Yes"
+```
+a)
+```{r}
+# Find the Test accuracy rate
+table(y,yhat1)
+aux1=prop.table(table(y,yhat1))
+aux1
+sum(diag(aux1))
+```
+b)
+```{r}
+# Find the True Positive Rate (TPR)
+confusionmat1=as.matrix(table(y,yhat1))
+rowSums(confusionmat1)
+TPR1=confusionmat1[2,2]/rowSums(confusionmat1)[2]
+TPR1
+```
+c)
+```{r}
+# Find the Area under the ROC curve (AUC)
+pred_ROCR1=prediction(probabs1,y)
+auc1=performance(pred_ROCR1,measure="auc")
+auc1=auc1@y.values[[1]]
+auc1
+```
+2.
+```{r}
+# Use the train set to fit a Linear Discriminant Analysis model.
+library(MASS)
+model2=lda(default~.,data=Default,subset=train)
+probabs2=predict(model2,Default[-train,])
+probabs2=probabs2$posterior[,2]
+head(probabs2)
+yhat2=rep("No",ntest)
+# Assume the threshold is 0.30
+yhat2[probabs2>0.3]="Yes"
+```
+a)
+```{r}
+# Find the Test accuracy rate
+table(y,yhat2)
+aux2=prop.table(table(y,yhat2))
+aux2
+sum(diag(aux2))
+```
+b)
+```{r}
+# Find the True Positive Rate (TPR)
+confusionmat2=as.matrix(table(y,yhat2))
+rowSums(confusionmat2)
+TPR2=confusionmat2[2,2]/rowSums(confusionmat2)[2]
+TPR2
+```
+c)
+```{r}
+# Find the Area under the ROC curve (AUC)
+pred_ROCR2=prediction(probabs2,y)
+auc2=performance(pred_ROCR2,measure="auc")
+auc2=auc2@y.values[[1]]
+auc2
+```
+3.
+```{r}
+# Use the train set to fit a Naive Bayes model.
+library(e1071)
+model3=naiveBayes(default~.,Default,subset=train)
+probabs3=predict(model3,Default[-train,],type="raw")
+probabs3=probabs3[,2]
+yhat3=rep("No",ntest)
+# Assume the threshold is 0.30
+yhat3[probabs3>0.3]="Yes"
+```
+a)
+```{r}
+# Find the Test accuracy rate
+table(y,yhat3)
+aux3=prop.table(table(y,yhat3))
+aux3
+sum(diag(aux3))
+```
+b)
+```{r}
+# Find the True Positive Rate (TPR)
+confusionmat3=as.matrix(table(y,yhat3))
+rowSums(confusionmat3)
+TPR3=confusionmat3[2,2]/rowSums(confusionmat3)[2]
+TPR3
+```
+c)
+```{r}
+# Find the Area under the ROC curve (AUC)
+pred_ROCR3=prediction(probabs3,y)
+auc3=performance(pred_ROCR3,measure="auc")
+auc3=auc3@y.values[[1]]
+auc3
+```
+4.
+```{r}
+# Show the ROC curves of all models in a single plot
+roc_ROCR1=performance(pred_ROCR1,measure="tpr",x.measure="fpr")
+roc_ROCR2=performance(pred_ROCR2,measure="tpr",x.measure="fpr")
+roc_ROCR3=performance(pred_ROCR3,measure="tpr",x.measure="fpr")
+plot(roc_ROCR1,col="red")
+plot(roc_ROCR2,col="blue",add=T)
+plot(roc_ROCR3,col="green",add=T)
+abline(a=0,b=1,lty=2)
+grid()
+legend("bottomright",
+       legend=c("Logistic Reg","LDA","Naive Bayes"),
+       col=c("red","blue","green"),
+       lty=c(1,1,1),bty="n")
+```

@@ -1,0 +1,84 @@
+---
+title: "Homework2"
+author: "Jiaqi Ma 3028009001"
+date: "2/5/2021"
+output: pdf_document
+---
+
+```{r}
+store=read.csv("/Users/majiaqi/Desktop/ISE535/HW2/store.csv")
+store$storeID=factor(store$storeID)
+```
+1.
+```{r}
+summary(store$p1sales)
+summary(store$p2sales)
+hist(store$p1sales)
+hist(store$p2sales)
+plot(density(store$p1sales,width=1.2,n=24),col="red",lwd=2)
+plot(density(store$p2sales,width=1.2,n=24),col="red",lwd=2)
+```
+
+2.
+```{r}
+boxplot(list(store$p1sales,store$p2sales),horizontal=T)
+hist(store$p1sales,breaks=30,col=rgb(1,0,0,0.3),
+     main="Histogram of weekly sales of P1(red) and P2(blue)",
+     xlim=c(50,270),ylim=c(0,250),xlab="sales")
+hist(store$p2sales,add=TRUE,breaks=30,col=rgb(0,0,1,0.3))
+plot(density(store$p1sales,width=1.2,n=24),col="red",lwd=2,
+     main="Kernal density estimateds of weekly sales of P1(red) and P2(blue)",
+     xlim=c(50,270),ylim=c(0,0.025),xlab="sales")
+lines(density(store$p2sales,width=1.2,n=24),col="blue",lwd=2)
+```
+
+3.
+```{r}
+boxplot(p1sales~storeID,store)
+boxplot(p2sales~storeID,store)
+d31=tapply(store$p1sales,store$storeID,max)
+d32=tapply(store$p2sales,store$storeID,max)
+which.max(d31)
+d31
+which.max(d32)
+d32
+```
+
+For product P1, the ID of the store with the largest weekly sales"263" is 106. 
+
+For product P2, the ID of the store with the largest weekly sales"225" is 114.
+
+4.
+```{r}
+library(e1071)
+skewness(store$p1sales)
+kurtosis(store$p1sales)
+x=scale(store$p1sales)
+qqnorm(x,pch=10,cex=0.3)
+qqline(x)
+# find the natural log of p1sales
+p1logsales=log(store$p1sales)
+skewness(p1logsales)
+kurtosis(p1logsales)
+y=scale(p1logsales)
+qqnorm(y,pch=10,cex=0.3)
+qqline(y)
+```
+
+For p1sales, skewness=0.73935(right skewed), kurtosis=0.656501(positive excess kurtosis).
+
+For the natural log of p1sales, skewness=0.1601015(slightly right skewed), kurtosis=-0.2026867(negative excess kurtosis).
+
+5.
+```{r}
+p1sales_sum=aggregate(p1sales~country,data=store,sum,na.rm=TRUE)
+library(rworldmap)
+library(RColorBrewer)
+p1sales.map=joinCountryData2Map(p1sales_sum,
+                                joinCode="ISO2",
+                                nameJoinColumn="country")
+mapCountryData(p1sales.map,nameColumnToPlot="p1sales",
+               mapTitle="Sales by Country",
+               colourPalette=brewer.pal(7,"Reds"),
+               catMethod="fixedWidth")
+```

@@ -1,0 +1,118 @@
+---
+title: "Exam 1"
+author: "Jiaqi Ma 3028009001"
+date: "3/18/2021"
+output: pdf_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+df=read_csv("/Users/majiaqi/Desktop/ISE535/midterm/fires.csv")
+df=select(df,STATE,YEAR=YEAR_,ACRES=TOTALACRES,CAUSE)
+theme_set(theme_bw())
+```
+
+1.
+```{r}
+head(df)
+# STATEs
+levels(factor(df$STATE))
+# YEARs
+levels(factor(df$YEAR))
+# CAUSEs
+levels(factor(df$CAUSE))
+# CAUSE is <character>
+```
+
+2.
+```{r}
+df2=group_by(df,YEAR)
+sm2=summarize(df2,TOTALACRES=sum(ACRES))
+print(sm2,n=40)
+```
+a)
+```{r}
+sm2a=summarise(df2,NUMBER=n())
+sm2a[which.max(sm2a$NUMBER),]
+# 2006 had the largest number of fires.
+```
+b)
+```{r}
+df[which.max(df$ACRES),]
+# 2007 had the largest fire.
+```
+c)
+```{r}
+ggplot(data=sm2)+
+  geom_point(mapping=aes(x=YEAR,y=TOTALACRES/1000000),size=1)+
+  geom_smooth(mapping=aes(x=YEAR,y=TOTALACRES/1000000),method='lm',se=F)+
+  labs(y='TOTALACRES (Million)')
+```
+
+3.
+```{r}
+df3=group_by(df,STATE,YEAR)
+sm3=summarize(df3,TOTALACRES=sum(ACRES))
+sm3
+```
+a)
+```{r}
+ggplot(data=sm3)+
+  geom_point(mapping=aes(x=YEAR,y=log10(TOTALACRES)),size=0.7)+
+  geom_smooth(mapping=aes(x=YEAR,y=log10(TOTALACRES)),method='lm',se=F)+
+  facet_wrap(~STATE)
+```
+
+4.
+```{r}
+df4=filter(df,df$STATE=='Arizona'|STATE=='California'|STATE=='Washington')
+df4=group_by(df4,STATE,YEAR)
+sm4=summarize(df4,TOTALACRES=sum(ACRES))
+sm4
+```
+a)
+```{r}
+ggplot(data=sm4)+
+  geom_point(mapping=aes(x=YEAR,y=log10(TOTALACRES)),size=0.7)+
+  geom_smooth(mapping=aes(x=YEAR,y=log10(TOTALACRES)),method='lm',se=F)+
+  facet_wrap(~STATE)
+```
+b)
+```{r}
+# a scatterplot of log10(TOTALACRES) by year
+ggplot(data=sm4)+
+  geom_point(mapping=aes(x=YEAR,y=log10(TOTALACRES),color=STATE),size=0.7)+
+  geom_smooth(mapping=aes(x=YEAR,y=log10(TOTALACRES),color=STATE),method='lm',se=F)
+# a scatterplot of TOTALACRES by year
+ggplot(data=sm4)+
+  geom_point(mapping=aes(x=YEAR,y=TOTALACRES,color=STATE),size=0.7)+
+  geom_smooth(mapping=aes(x=YEAR,y=TOTALACRES,color=STATE),method='lm',se=F)
+```
+
+5.
+```{r}
+df5=filter(df,CAUSE=='Human')
+df5=group_by(df5,YEAR)
+```
+a)
+```{r}
+ggplot(df5,aes(x=YEAR))+
+  geom_bar()+
+  labs(y='the Number of Wildfires (CAUSEd by Humans)')
+```
+b)
+```{r}
+sm5b=summarise(df5,WILDFIRES=n())
+ggplot(sm5b,aes(x=YEAR,y=WILDFIRES))+
+  geom_bar(stat='identity')+
+  labs(y='the Number of Wildfires (CAUSEd by Humans)')
+```
+c)
+```{r}
+sm5c=summarise(df5,TOTALACRES=sum(ACRES))
+ggplot(sm5c,aes(x=YEAR,y=TOTALACRES))+
+  geom_col()+
+  labs(y='Acres Burnt per Year (Fires CAUSEd by Humans)')
+```

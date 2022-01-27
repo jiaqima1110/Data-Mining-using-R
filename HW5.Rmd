@@ -1,0 +1,79 @@
+---
+title: "HW5"
+author: "Jiaqi Ma 3028009001"
+date: "4/1/2021"
+output: pdf_document
+---
+1.
+```{r}
+nci=read.csv("/Users/majiaqi/Desktop/ISE535/HW5/nci.csv")
+lab=nci[,1]
+nci2=nci[,2:6831]
+# Scale the measurements
+nci3=data.frame(scale(nci2))
+```
+a)
+```{r}
+distance=dist(nci3)
+distmat=as.matrix(distance)
+# Perform hierarchical clustering using complete linkage
+h=hclust(distance,method="complete")
+# Plot the resulting dendrogram
+plot(h,cex=0.5,xlab="samples",ylab="")
+# Group the samples into 4 clusters
+rect.hclust(h,k=4,border="red")
+# Plot the clusters in PC1, PC2 space
+cut=cutree(h,k=4)
+library(factoextra)
+fviz_cluster(list(data=nci3,cluster=cut),
+             palette="Set2",show.clust.cent=F,labelsize=10,
+             repel=T, ggtheme = theme_minimal()
+             )+
+             geom_text(aes(x=x,label=lab,colour=cluster))
+```
+
+b)
+```{r}
+# Perform K-means clustering
+k=kmeans(nci3,centers=4,nstart=20)
+# Plot the clusters in PC1, PC2 space
+fviz_cluster(k,data=nci3)+geom_text(aes(x=x,label=lab,colour=cluster))
+```
+
+2.
+a)
+```{r}
+df2=read.csv("/Users/majiaqi/Desktop/ISE535/HW5/segment.csv")
+# Split the data into training and test sets
+set.seed(1)
+train=sample(1:300,300*85/100)
+df2train=df2[train,]
+df2test=df2[-train,]
+# Construct a Naive Bayes model
+library(e1071)
+m=naiveBayes(subscribe~.,df2train)
+m
+```
+b)
+```{r}
+pred=predict(m,df2test)
+df2b=data.frame(df2test,pred)
+df2b
+# confusion matrix
+table(pred,truesubscribe=df2b$subscribe)
+# error rate
+aux=prop.table(table(pred,subscribe=df2b$subscribe))
+1-sum(diag(aux))
+```
+c)
+```{r}
+newval=data.frame(age=43,gender="Male",income=52000,kids=1,onwHome="ownNo",Segment="Suburb mix")
+newval
+subscribehat=predict(m,newval)
+subscribehat
+# He would NOT subscribe.
+# posterior probabilities
+proba=predict(m,newval,type="raw")
+proba
+# The posterior probability of subscribing to the service is 0.04586094.
+```

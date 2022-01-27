@@ -1,0 +1,68 @@
+---
+title: "Homework3"
+author: "Jiaqi Ma 3028009001"
+date: "2/18/2021"
+output: pdf_document
+---
+
+```{r}
+segment=read.csv("/Users/majiaqi/Desktop/ISE535/HW3/segment.csv")
+stock=read.csv("/Users/majiaqi/Desktop/ISE535/HW3/stockreturns.csv")
+universities=read.csv("/Users/majiaqi/Desktop/ISE535/HW3/universities.csv")
+```
+1.
+```{r}
+# a)
+t1=table("ownHome"=segment$ownHome,"subscribe"=segment$subscribe)
+t1
+# b)
+headlines=c("ownNo","ownYes")
+sub=t1[,2]
+all=c(t1[1,1]+t1[1,2],t1[2,1]+t1[2,2])
+d1=rbind(sub,all)
+d1=data.frame(d1)
+names(d1)=headlines
+d1
+sub/all
+prop.test(sub,all,alt="greater",correct=F)
+```
+p-value=0.3927>0.05
+
+The proportion of subscribers is the same between home owners and home renters.
+
+2.
+```{r}
+# a)
+cor(stock)
+# b)
+pca2=prcomp(stock)
+pca2$rotation
+```
+a) JPM,Citibank and Wfargo are related. Shell and Exxon are related.
+b) PC1=-0.2228228*JPM-0.3072900*Citibank-0.1548103*WFargo-0.6389680*Shell-0.6509044*Exxon
+
+PC2=0.6252260*JPM+0.5703900*Citibank+0.3445049*WFargo-0.2479475*Shell-0.3218478*Exxon
+
+3.
+```{r}
+# scale the dataframe
+d3=universities[,c(2:7)]
+d3=scale(d3,center=F,scale=T)
+row.names(d3)=universities$University
+# a)
+pca3=prcomp(d3)
+# eigenvalues
+pca3$sdev^2
+# rotation matrix, columns are eigenvectors
+pca3$rotation
+# b)
+library(factoextra)
+fviz_pca_biplot(pca3,repel=T,
+                col.var="grey",
+                habillage=universities$Funding)
+```
+TOP10 Universities: Caltech, Harvard, Princeton, Brown, Dartmouth, Stanford, Yale, MIT, Duke, UCBerkeley
+
+Universities with more expenses: Caltech, JohnsHopkins
+
+Expenses and Accept differentiate the public and private universities.

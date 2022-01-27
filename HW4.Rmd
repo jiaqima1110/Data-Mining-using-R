@@ -1,0 +1,71 @@
+---
+title: "HW4"
+author: "Jiaqi Ma 3028009001"
+date: "3/4/2021"
+output: pdf_document
+---
+1.
+a)
+```{r}
+library(factoextra)
+library(dslabs)
+df0=readRDS("/Users/majiaqi/Desktop/ISE535/HW4/mnist.rds")
+str(df0)
+x=data.frame(df0$test$images)
+y=data.frame(df0$test$labels)
+names(y)="ID"
+df=data.frame(y,x)
+```
+
+b)
+```{r}
+table("ID"=df$ID)
+```
+
+c)
+```{r}
+df34=subset(df,subset=ID==3|ID==4)
+x34=df34[,c(2:785)]
+set.seed(1)
+k34=kmeans(x34,centers=2,nstart=20,iter.max=20)
+fviz_cluster(k34,data=x34,stand=F,geom="point")+geom_text(aes(x=x,label=df34$ID,colour=cluster))
+cluster_number34=as.factor(k34$cluster)
+df34$cluster=cluster_number34
+table("ID"=df34$ID,"cluster"=df34$cluster)
+```
+
+In cluster 1(ID 3), 964 digits are correctly grouped while 1 is not.
+In cluster 2(ID 4), 981 digits are correctly grouped while 46 are not.
+
+d)
+```{r}
+df169=subset(df,subset=ID==1|ID==6|ID==9)
+x169=df169[,c(2:785)]
+set.seed(1)
+k169=kmeans(x169,centers=3,nstart=20,iter.max=20)
+fviz_cluster(k169,data=x169,stand=F,geom="point")+geom_text(aes(x=x,label=df169$ID,colour=cluster))
+cluster_number169=as.factor(k169$cluster)
+df169$cluster=cluster_number169
+table("ID"=df169$ID,"cluster"=df169$cluster)
+```
+
+In cluster 1(ID 9), 938 digits are correctly grouped while 3+6=9 are not.
+In cluster 2(ID 1), 1128 digits are correctly grouped while 75+46=121 are not.
+In cluster 3(ID 6), 877 digits are correctly grouped while 4+25=9 are not.
+
+2
+a)
+```{r}
+StudyArea=read.csv("/Users/majiaqi/Desktop/ISE535/HW4/StudyArea.csv")
+library(dplyr)
+d2=filter(StudyArea,TOTALACRES>1000)
+grp=group_by(d2,YEAR=YEAR_)
+sm=summarise(grp,wildfires=n())
+sm
+```
+
+b)
+```{r}
+sm2=summarise(grp,acreage=sum(TOTALACRES))
+sm2
+```

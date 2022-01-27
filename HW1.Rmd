@@ -1,0 +1,71 @@
+---
+title: "Homework1"
+author: "Jiaqi Ma 3028009001"
+date: "1/24/2021"
+output: pdf_document
+---
+
+```{r}
+VIT<-read.csv("/Users/majiaqi/Desktop/ISE535/HW1/VIT.csv")
+```
+1.Find the number of apartments by the number of garages.
+```{r}
+table("the number of garages"=VIT$garage)
+```
+2.Create a chart showing boxplots for the apartment's price for each floor.
+```{r}
+d2=VIT
+d2$floor=factor(d2$floor)
+plot(price~floor,d2)
+```
+
+3.Create a crosstab table for the number of apartments by the number of rooms(rows) and the number of garages(cols).
+```{r}
+table("the number of rooms"=VIT$rooms,"the number of garages"=VIT$garage)
+```
+4.Find the average price of the apartments for each category from question 3.
+```{r}
+l4=list("the number of rooms"=VIT$rooms,"the number of garages"=VIT$garage)
+tapply(VIT$price,l4,mean)
+```
+5.Find the min and max price of apartments with area between 80 and 90 square meters.
+```{r}
+d5=subset(VIT,price,subset = area>=80 & area<=90)
+min(d5)
+max(d5)
+# The min price is 168000e and the max price is 398000e.
+```
+6.What numeric variable is most correlated with price? Draw a scatterplot.
+```{r}
+d6=VIT[,-c(3,4,8,9,13,14)]
+cor(d6)
+pairs(~price+area+age+floor+rooms+toilets+garage+elevator+storage,VIT,pch=19,cex=0.1)
+# Area is most correlated with price.
+plot(price~area,VIT,pch=19,cex=0.75)
+```
+
+7.On average, how much more expensive is an apartment in street type S4 than S2?
+```{r}
+aS4=apply(subset(VIT,price,subset = street=="S4"),2,mean)
+aS2=apply(subset(VIT,price,subset = street=="S2"),2,mean)
+a=aS4-aS2
+a
+# An apartment in street type S4 is 10673.02e more expensive than S2. 
+```
+8.Create a scatterplot of y:price against x:age. Fit a regression line to display the price trend as the apartment gets older.
+```{r}
+plot(price~age,VIT,pch=19,cex=0.75)
+m1=lm(price~age,VIT)
+coefficients(m1)
+abline(m1,col="red",lwd=2)
+```
+
+9.The realtor thinks that in Vitoria, each square meter will cost roughly 15000e. Create a scatterplot of y:price against x:area. Fit a regression line to estimate the price trend as the apartment area increases. What is your estimate of how much is the price increase by square meter?
+```{r}
+plot(price~area,VIT,pch=19,cex=0.75)
+m2=lm(price~area,VIT)
+coefficients(m2)
+abline(m2,col="red",lwd=2)
+# The price trend is: price=40817.980+2704.749*area
+# On average, the price increases by 2704.749e when area increases by 1 square meter.
+```
